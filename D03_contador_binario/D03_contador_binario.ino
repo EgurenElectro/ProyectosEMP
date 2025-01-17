@@ -12,7 +12,7 @@
 
 #define P1 27
 
-#define WT 1000
+#define WT 500
 
 int tabla[16][4] = {
   {0, 0, 0, 0},
@@ -33,6 +33,8 @@ int tabla[16][4] = {
   {1, 1, 1, 1},
 };
 
+int cursor = -1;
+
 void setup() 
 {
   pinMode(D1, OUTPUT);
@@ -45,23 +47,14 @@ void setup()
 
 void loop() 
 {
-  for(byte i = 0; i < 16; i++)
-  {
-    if(!digitalRead(P1))
-    {
-      digitalWrite(D1, LOW);
-      digitalWrite(D2, LOW);
-      digitalWrite(D3, LOW);
-      digitalWrite(D4, LOW);
-      break;
-    }
+  if(!digitalRead(P1)) return;
 
-    digitalWrite(D1, tabla[i][0]);
-    digitalWrite(D2, tabla[i][1]);
-    digitalWrite(D3, tabla[i][2]);
-    digitalWrite(D4, tabla[i][3]);
+  cursor = cursor == 15 ? 0 : cursor + 1;
 
-    delay(WT);
-  }
+  digitalWrite(D1, tabla[cursor][0]);
+  digitalWrite(D2, tabla[cursor][1]);
+  digitalWrite(D3, tabla[cursor][2]);
+  digitalWrite(D4, tabla[cursor][3]);
 
+  delay(WT);
 }
