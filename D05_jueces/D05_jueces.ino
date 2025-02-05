@@ -34,7 +34,7 @@ void loop()
   p2_pressed = !(digitalRead(P2));
   p3_pressed = !(digitalRead(P3));
 
-  bool activate = int(p1_pressed) + int(p2_pressed) + int(p3_pressed) == 2;
+  bool activate = int(p1_pressed) + int(p2_pressed) + int(p3_pressed) >= 2;
 
   if(activate)
   {

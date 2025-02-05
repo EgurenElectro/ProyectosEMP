@@ -34,43 +34,28 @@ void loop()
 {
   if(!digitalRead(P1))
   {
-    if(!b1Active && !b2Active && !b3Active)
-    {
-      b1Active = true;
-      digitalWrite(B1, 1);
-    }
-    else if(b1Active && !b2Active && !b3Active)
-    {
-      b1Active = false;
-      digitalWrite(B1, 0);
-    }
+    if(!b1Active && !b2Active && !b3Active) b1Active = true;
+    else if(b1Active && !b2Active && !b3Active) b1Active = false;
+
+    digitalWrite(B1, b1Active);
+    delay(500);
   }
 
   if(!digitalRead(P2))
   {
-    if(b1Active && !b2Active && !b3Active)
-    {
-      b2Active = true;
-      digitalWrite(B2, 1);
-    }
-    else if(b1Active && b2Active && !b3Active)
-    {
-      b2Active = false;
-      digitalWrite(B2, 0);
-    }
+    if(b1Active && !b2Active && !b3Active) b2Active = true;
+    else if(b1Active && b2Active && !b3Active) b2Active = false;
+
+    digitalWrite(B2, b2Active);
+    delay(500);
   }
 
   if(!digitalRead(P3))
   {
-    if(b1Active && b2Active && !b3Active)
-    {
-      b3Active = true;
-      digitalWrite(B3, 1);
-    }
-    else if(b1Active && b2Active && b3Active)
-    {
-      b3Active = false;
-      digitalWrite(B3, 0);
-    }
+    if(b1Active && b2Active && !b3Active) b3Active = true;
+    else if(b1Active && b2Active && b3Active) b3Active = false;
+
+    digitalWrite(B3, b3Active);
+    delay(500);
   }
 }

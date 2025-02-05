@@ -29,7 +29,14 @@ void loop()
 {
   potValue = map(analogRead(POT), 0, 4095, 0, 100);
 
-  if(potValue <= 25)
+  if(potValue == 0)
+  {
+    digitalWrite(D1, 0);
+    digitalWrite(D2, 0);
+    digitalWrite(D3, 0);
+    digitalWrite(D4, 0);
+  }
+  else if(potValue <= 25)
   {
     digitalWrite(D1, 1);
     digitalWrite(D2, 0);

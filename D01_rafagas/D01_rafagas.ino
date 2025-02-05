@@ -1,5 +1,5 @@
 //------------------------------------------------------------
-// Programa: D01_rafagas.ino (ESP32 + BIOS Shield)
+// Programa:    .ino (ESP32 + BIOS Shield)
 // Autor: Gabriel Bravo Eguren T31A (13-01-2025)
 // Descripción: genera en el led rojo de la Shield de
 //              forma ininterrumpida, tres parpadeos de 

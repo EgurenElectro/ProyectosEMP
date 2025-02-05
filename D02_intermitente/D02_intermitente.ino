@@ -43,7 +43,7 @@ void loop()
     digitalWrite(D3, LOW);
     digitalWrite(D4, LOW);
     delay(INTERVALO);
-  }
 
-  delay(1000);
+    delay(1000);
+  }
 }

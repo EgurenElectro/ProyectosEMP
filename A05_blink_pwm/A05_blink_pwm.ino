@@ -6,17 +6,23 @@
 //              del todo ni a encenderse del todo)
 //------------------------------------------------------------
 
-#define D3 5
+#define D1 12
+
+float bmax;
+float bmin; 
 
 void setup() 
 {
-  pinMode(D3, OUTPUT); 
+  pinMode(D1, OUTPUT);
+
+  bmax = 255 * 0.9;
+  bmin = 255 * 0.1;
 }
 
 void loop() 
 {
-  analogWrite(D3, int(255.0 * 0.9));
-  delay(100);
-  analogWrite(D3, int(255.0 * 0.1));
-  delay(100);
+  analogWrite(D1, bmin);
+  delay(250);
+  analogWrite(D1, bmax);
+  delay(250);
 }
