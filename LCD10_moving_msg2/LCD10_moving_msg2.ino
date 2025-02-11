@@ -6,7 +6,6 @@
 LiquidCrystal_PCF8574 lcd(0x3F); 
 
 bool p1down = false;
-int pos = 0;
 
 byte tren[2][8] = {
   { //Locomotora
