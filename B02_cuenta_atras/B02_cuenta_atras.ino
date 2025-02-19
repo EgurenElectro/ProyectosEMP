@@ -1,15 +1,16 @@
 //------------------------------------------------------------
-// Programa: B01_valores.ino (ESP32 + BIOS Shield)
+// Programa: B02_cuenta-atras.ino (ESP32 + BIOS Shield)
 // Autor: Gabriel Bravo Eguren T31A (15-01-2025)
-// Descripción: Realiza un programa que muestre en el lcd los números del 1 al 7 separados por
-//              comas en la primera línea del LCD cada vez que se pulse P1. Al pulsar P2 se borrará la pantalla.
-//              Utiliza un bucle for o while para resolver el ejercicio.
+// Descripción: Realiza un programa que muestre en el LCD el valor 10. Cuando se pulse P1
+//              el valor comenzará a descontarse a intervalos de un segundo hasta llegar a cero. En este momento
+//              sonarán cuatro pitidos y se reinicia el contador a 10
 //------------------------------------------------------------
 
 #include <LiquidCrystal_PCF8574.h>
 
 #define P1 27
 #define P2 16
+#define BUZZER 14
 
 bool p1down = false;
 bool p2down = false;
@@ -23,6 +24,9 @@ void setup()
 
   pinMode(P1, INPUT_PULLUP);
   pinMode(P2, INPUT_PULLUP);
+
+  lcd.setCursor(0,0);
+  lcd.print("10");
 }
 
 void loop() 
@@ -32,24 +36,23 @@ void loop()
 
   if(digitalRead(P1) && p1down)
   {
-    p1down = false;
-    String texto = "";
-
-    for(int i = 1; i <= 7; i++)
+    for(int i = 10; i >= 0; i--)
     {
-      texto += i;
-      if(i != 7) texto += ",";
-
       lcd.clear();
-      lcd.setCursor(0,0);
-      lcd.print(texto);
+      lcd.print(i);
+      delay(800);
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+      tone(BUZZER, 1047, 50); 
       delay(100);
     }
+
+    lcd.clear();
+    lcd.print("10");
+
+    p1down = false;
   }
 
-  if(digitalRead(P2) && p2down)
-  {
-    p2down = false;
-    lcd.clear();
-  }
 }
