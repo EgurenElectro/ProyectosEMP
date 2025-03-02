@@ -1,86 +1,68 @@
+//------------------------------------------------------------
+// Programa: LCD10_moving_msg2.ino (ESP32 + BIOS Shield)
+// Autor: Gabriel Bravo Eguren T31A 
+// Descripción: Realiza un programa que muestre el
+//              mensaje “P1->Start” centrado en la primera línea del LCD. Al
+//              pulsar se mostrará el mensaje: “Proxima estación ATOCHA”,
+//              entrando por la parte derecha del lcd hasta desaparecer por la
+//              izquierda. Se esperará un segundo y se volverá a mostrar el
+//              mensaje inicial.
+//------------------------------------------------------------
+
 #include <LiquidCrystal_PCF8574.h>
 
 #define P1 27
-#define P2 16
-#define WT 250
 
 LiquidCrystal_PCF8574 lcd(0x3F); 
 
 bool p1down = false;
-bool p2down = false;
-
-String estaciones[5] = {
-  "GUADALAJARA",
-  "AZUQUECA",
-  "MECO",
-  "ALCALA UNIVERSIDAD",
-  "ALCALA DE HENARES"
-};
-
-int direccion = 0;
+bool update = true;
 
 void setup() 
 {
   lcd.begin(16, 2);
   lcd.setBacklight(255);
-  
+
   pinMode(P1, INPUT_PULLUP);
-  pinMode(P2, INPUT_PULLUP);
-
-  menu();
-}
-
-void menu()
-{
-  lcd.clear();
-  lcd.setCursor(3, 0);
-  lcd.print("P1->Start");
-  lcd.setCursor(3, 1);
-  if(direccion == 0) lcd.print("IDA");
-  else lcd.print("VUELTA");
 }
 
 void loop() 
 {
   if(!digitalRead(P1)) p1down = true;
-  if(!digitalRead(P2)) p2down = true;
-
-  if(digitalRead(P2) && p2down)
-  {
-    direccion = direccion == 0 ? 1 : 0;
-    p2down = false;
-    menu();
-  }
 
   if(digitalRead(P1) && p1down)
   {
-    p1down = false;
+    String texto = "Proxima estacion ATOCHA";
 
-    String texto = "Proximas estaciones: ";
-
-    for(int i = (direccion == 0 ? 0 : 4); (direccion == 0 ? (i < 5) : (i >= 0)); (direccion == 0 ? i++ : i--))
+    for(int i = 15; i >= 0; i--)
     {
-      texto += estaciones[i];
-      if(direccion == 0 && i != 4) texto += ", ";
-      if(direccion == 1 && i != 0) texto += ", "; 
+      lcd.clear();
+      lcd.setCursor(i, 0);
+      lcd.print(texto);
+      delay(250);
     }
     
-    lcd.setCursor(0,0);
+    int longTexto = texto.length();
 
-    for(int i = 0; i < 16; i++)
-    {
-      texto = " " + texto;
-    }
-
-    while(texto.length() > 0)
+    for(int i = 0; i < longTexto; i++)
     {
       lcd.clear();
       texto = texto.substring(1);
-      lcd.print(texto.substring(0, 16));
-      delay(WT);
+      lcd.print(texto);
+      delay(250);
     }
 
-    delay(800);
-    menu();
+    delay(750);
+
+    update = true;
+    p1down = false;
+  }
+
+  if(update)
+  {
+    lcd.setCursor(9, 0);
+    lcd.clear();
+    lcd.print("P1->Start");
+    update = false;
   }
 }
