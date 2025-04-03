@@ -1,3 +1,6 @@
+// Titulo: S04_barrera_parking
+// Autor: Gabriel Bravo Eguren T31A
+
 #include <ESP32Servo.h>
 #include <LiquidCrystal_PCF8574.h>
 #include <GBClock.h>
