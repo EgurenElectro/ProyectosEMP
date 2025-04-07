@@ -63,7 +63,7 @@ void loop()
 
     mostrar(ldr, grados);
 
-    if(abs(prevGrados - grados) > 5)
+    if(abs(prevGrados - grados) > 4)
     {
       servo.write(grados);
       prevGrados = grados;
