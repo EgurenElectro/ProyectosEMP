@@ -3,18 +3,65 @@
 
 #include <ESP32Servo.h>
 #include <LiquidCrystal_PCF8574.h>
-#include <GBClock.h>
 
 #define P1 27
 #define P2 16
 
 #define SERVO 25
 
+//Objeto Reloj (Gabriel Bravo Clock)
+struct GBClock
+{
+public:
+
+  void start()
+  {
+    startTime = millis();
+    running = true;
+  }
+
+  unsigned long stop()
+  {
+    running = false;
+    return millis() - startTime;
+  }
+
+  unsigned long restart()
+  {
+    unsigned long elapsed = stop();
+    start();
+    return elapsed;
+  }
+
+  bool check(unsigned long mark)
+  {
+    if (!running) return false;
+    
+    return millis() - startTime >= mark;
+  }
+
+  unsigned long elapsed()
+  {
+    if(running) return millis() - startTime;
+    else return 0;
+  }
+
+  bool started()
+  {
+    return running;
+  }
+
+private:
+
+  unsigned long startTime = 0;
+  bool running = false;
+};
+
 Servo servo;
 LiquidCrystal_PCF8574 lcd(0x3F);
 
-gb::Clock clockP1; 
-gb::Clock clockP2;
+GBClock clockP1; 
+GBClock clockP2;
 
 int plazas = 0;
 
@@ -45,9 +92,6 @@ void setup()
   mensaje("CERRADA");
   servo.write(0);
   delay(2000);
-
-  f1.setup(10);
-  f2.setup(10);
 
   Serial.begin(9600);
 }

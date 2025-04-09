@@ -2,7 +2,6 @@
 // Autor: Gabriel Bravo Eguren T31A 
 
 #include <ESP32Servo.h>
-#include <GBClock.h>
 #include <LiquidCrystal_PCF8574.h>
 
 #define P1 27
@@ -11,15 +10,63 @@
 
 #define SERVO 25
 
+
+//Objeto Reloj (Gabriel Bravo Clock)
+struct GBClock
+{
+public:
+
+  void start()
+  {
+    startTime = millis();
+    running = true;
+  }
+
+  unsigned long stop()
+  {
+    running = false;
+    return millis() - startTime;
+  }
+
+  unsigned long restart()
+  {
+    unsigned long elapsed = stop();
+    start();
+    return elapsed;
+  }
+
+  bool check(unsigned long mark)
+  {
+    if (!running) return false;
+    
+    return millis() - startTime >= mark;
+  }
+
+  unsigned long elapsed()
+  {
+    if(running) return millis() - startTime;
+    else return 0;
+  }
+
+  bool started()
+  {
+    return running;
+  }
+
+private:
+
+  unsigned long startTime = 0;
+  bool running = false;
+};
+
 enum Movement
 {
   LEFT, RIGHT, CENTER
 };
 
-gb::Clock clock1;
 Servo servo;
 LiquidCrystal_PCF8574 lcd(0x3F); 
-
+GBClock clock1;
 
 bool p1Pressed = false;
 bool p2Pressed = false;
