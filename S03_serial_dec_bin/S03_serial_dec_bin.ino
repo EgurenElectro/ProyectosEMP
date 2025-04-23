@@ -42,6 +42,8 @@ void loop()
   {
     auto valor = Serial.parseInt();
 
+    if(valor < 0 || valor > 100) return;
+
     lcd.clear();
     lcd.home();
     lcd.print(binario(valor));

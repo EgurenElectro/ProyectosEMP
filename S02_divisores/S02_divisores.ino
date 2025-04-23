@@ -19,6 +19,8 @@ void loop()
   {
     auto value = Serial.parseInt();
 
+    if(value < 0 || value > 100) return;
+
     String divisores = "";
 
     for(int i = 1; i <= value; i++)

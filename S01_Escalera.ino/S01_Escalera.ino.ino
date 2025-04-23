@@ -12,8 +12,10 @@ unsigned long t1;
 long waiter;
 
 bool p1pressed = false;
-bool update = true;
-byte dstatus = 0;
+byte d1status = 0;
+byte d2status = 0;
+byte d3status = 0;
+byte d4status = 0;
 
 void setup() 
 {
@@ -24,7 +26,7 @@ void setup()
 
   pinMode(P1, INPUT_PULLUP);
 
-  waiter = -1000;
+  waiter = 0;
 }
 
 void loop() 
@@ -36,32 +38,28 @@ void loop()
     p1pressed = false;
     waiter = 5000;
     t1 = millis();
-    update = true;
   }
 
   if(waiter > 0)
   {
     waiter -= millis() - t1;
     t1 = millis();
-    dstatus = 1;
+    
+    if(waiter <= 5000) d1status = 1;
+    if(waiter <= 4900) d2status = 1;
+    if(waiter <= 4800) d3status = 1;
+    if(waiter <= 4700) d4status = 1;
   }
   else 
   {
-    dstatus = 0;
-
-    if(waiter != -1000)
-    {
-      update = true;
-      waiter = -1000;
-    }
+    d1status = 0;
+    d2status = 0;
+    d3status = 0;
+    d4status = 0;
   }
 
-  if(update)
-  {
-    update = false;
-    digitalWrite(D1, dstatus);
-    digitalWrite(D2, dstatus);
-    digitalWrite(D3, dstatus);
-    digitalWrite(D4, dstatus);
-  }
+  digitalWrite(D1, d1status);
+  digitalWrite(D2, d2status);
+  digitalWrite(D3, d3status);
+  digitalWrite(D4, d4status);
 }
