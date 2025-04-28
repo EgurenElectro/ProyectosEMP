@@ -170,16 +170,16 @@ byte pressButtonChar[] = {
   B11111
 };
 
-#define BRAND_CHAR byte(7)
-byte brandChar[] = {
-  B00000,
+#define WALL_CHAR byte(7)
+byte wallChar[] = {
   B11111,
-  B00101,
   B11111,
-  B00100,
   B11111,
-  B00101,
-  B11101
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
 };
 
 gb::Clock ck;
@@ -202,6 +202,7 @@ bool welcomeOnce = false;
 bool menuOnce = false;
 bool settingsOnce = false;
 bool clockOnce = false;
+bool paused = false;
 
 void staticRender(Screen screen)
 {
@@ -262,10 +263,17 @@ void staticRender(Screen screen)
   {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("J1     ||     ");
-    lcd.print("J2");
+    //lcd.print("J1     ||     ");
+    lcd.print("J1     ");
+    lcd.write(WALL_CHAR);
+    lcd.write(WALL_CHAR);
+    lcd.print("     J2");
     lcd.setCursor(0, 1);
-    lcd.print(time1.toString() + "  ||  " + time2.toString());
+    // lcd.print(time1.toString() + "  ||  " + time2.toString());
+    lcd.print(time1.toString() + "  ");
+    lcd.write(WALL_CHAR);
+    lcd.write(WALL_CHAR);
+    lcd.print("  " + time2.toString());
   }
 }
 
@@ -295,7 +303,11 @@ void dynamicRender(Screen screen, bool flag1 = true, bool flag2 = true)
   if(screen == Screen::CLOCK)
   {
     lcd.setCursor(0, 1);
-    lcd.print(time1.toString() + "  ||  " + time2.toString());
+    // lcd.print(time1.toString() + "  ||  " + time2.toString());
+    lcd.print(time1.toString() + "  ");
+    lcd.write(WALL_CHAR);
+    lcd.write(WALL_CHAR);
+    lcd.print("  " + time2.toString());
   }
 }
 
@@ -321,7 +333,7 @@ void setup()
   lcd.createChar(4, arrowDownChar);
   lcd.createChar(5, arrowRightChar);
   lcd.createChar(6, pressButtonChar);
-  lcd.createChar(7, brandChar);
+  lcd.createChar(7, wallChar);
 
   pinMode(P1, INPUT_PULLUP);
   pinMode(P2, INPUT_PULLUP);
@@ -492,6 +504,7 @@ void loop()
 
       if(p1Event)
       {
+        paused = false;
         p1Event = false;
         if(turn == 0) ck.start();
         turn = 1;
@@ -499,6 +512,7 @@ void loop()
 
       if(p2Event)
       {
+        paused = false;
         p2Event = false;
         if(turn == 0) ck.start();
         turn = 2;
@@ -510,6 +524,13 @@ void loop()
         turn = 0;
         time1 = gameTime;
         time2 = gameTime;
+
+        if(!paused) paused = true;
+        else
+        {
+          currentScreen = Screen::MENU;
+          return;
+        }
       }
 
       if(ck.check(1000))
