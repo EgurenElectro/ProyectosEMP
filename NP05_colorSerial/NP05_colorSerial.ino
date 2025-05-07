@@ -53,7 +53,6 @@ void loop()
       Serial.println(brillo);
       brillo = map(brillo, 0, 100, 0, 255);
       tira.setBrightness(brillo);
-      Serial.println(brillo);
       tira.show();
     } 
     if(entrada == "rojo") colorActual = rojo;

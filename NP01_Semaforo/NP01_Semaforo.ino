@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-#include <GBClock.h>
 
 #define NUMPIXELS 8
 #define PIN 26
@@ -8,10 +7,8 @@
 
 Adafruit_NeoPixel tira = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-gb::Clock ck;
-
 bool p1pressed = false;
-bool p2pressed = false;
+unsigned long tinicio = 0;
 
 void color(String _color)
 {
@@ -62,30 +59,35 @@ void setup()
   pinMode(P2, INPUT_PULLUP);
 }
 
+
 void loop() 
 {
   if(!digitalRead(P1)) p1pressed = true;
 
-  if(!digitalRead(P2)) 
+  while(!digitalRead(P2))
   {
-    p2pressed = true;
-    if(!ck.started()) ck.start();
+    if(tinicio == 0)
+    {
+      tinicio = millis();
+    }
 
-    color("off");
+    auto transcurrido = millis() - tinicio;
 
-    if(ck.check(1000)) 
+    if(transcurrido <= 500)
     {
       color("off");
-      ck.restart();
     }
-    
-    if(ck.check(500)) 
+    else if(transcurrido <= 1000)
     {
       color("naranja");
     }
+    else if(transcurrido > 1000)
+    {
+      tinicio = 0;
+    }
   }
 
-  if(digitalRead(P1) && p1pressed && !ck.started())
+  if(digitalRead(P1) && p1pressed)
   {
     p1pressed = false;
     color("naranja");
@@ -94,11 +96,5 @@ void loop()
     delay(5000);
   }
 
-  if(digitalRead(P2) && p2pressed)
-  {
-    p2pressed = false;
-    ck.stop();
-  }
-
-  if(!ck.started()) color("verde");
+  color("verde");
 }

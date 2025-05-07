@@ -43,9 +43,11 @@ namespace chess
     {
       if(_minutes < 0  || _seconds < 0) return;
       if(_seconds > 59) return;
+      if(minutes + _minutes >= 100) return;
 
       if(seconds + _seconds > 59)
       {
+        if(minutes + 1 == 100) return;
         minutes++;
         seconds = abs(_seconds + seconds - 60);
       } 
@@ -398,19 +400,19 @@ void loop()
       if(p1Event)
       {
         p1Event = false;
-        currentScreen = Screen::MENU;
+        currentScreen = Screen::SETTINGS;
       }
 
       if(p2Event)
       {
         p2Event = false;
-        currentScreen = Screen::MENU;
+        currentScreen = Screen::SETTINGS;
       }
 
       if(p1p2Event)
       {
         p1p2Event = false;
-        currentScreen = Screen::MENU;
+        currentScreen = Screen::SETTINGS;
       }
 
       break;
@@ -471,7 +473,7 @@ void loop()
         if(settings_timer_mode == 2)
         {
           reset();
-          currentScreen = Screen::MENU;
+          currentScreen = Screen::CLOCK;
         }
       }
 
@@ -528,7 +530,7 @@ void loop()
         if(!paused) paused = true;
         else
         {
-          currentScreen = Screen::MENU;
+          currentScreen = Screen::SETTINGS;
           return;
         }
       }
