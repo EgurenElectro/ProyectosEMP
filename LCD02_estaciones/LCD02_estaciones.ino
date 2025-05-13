@@ -1,5 +1,6 @@
 //------------------------------------------------------------
 // Programa: LCD02_estaciones.ino (ESP32 + BIOS Shield)
+
 // Autor: Gabriel Bravo Eguren T31A 
 // Descripción: Realiza un programa que muestre en
 //              pantalla inicialmente en la primera línea del lcd el texto

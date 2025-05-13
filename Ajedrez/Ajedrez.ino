@@ -6,6 +6,7 @@
 
 LiquidCrystal_PCF8574 lcd(0x3F);
 
+//Clase tiempo, sirve para administrar y manejar de forma cómoda los tiempos de los jugadores.
 namespace chess
 {
   struct Time
@@ -37,6 +38,11 @@ namespace chess
     int getSeconds()
     {
       return seconds;
+    }
+
+    bool isZero()
+    {
+      return minutes == 0 && seconds == 0;
     }
 
     void add(int _minutes, int _seconds)
@@ -80,6 +86,7 @@ namespace chess
   };
 }
 
+//Enumeración con las distintas pantallas disponibles para renderizar.
 enum Screen 
 {
   WELCOME,
@@ -87,6 +94,8 @@ enum Screen
   SETTINGS,
   CLOCK
 };
+
+//Colección de caracteres personalizados para LCD
 
 #define SETTINGS_CHAR byte(0)
 byte settingsChar[] = {
@@ -184,15 +193,27 @@ byte wallChar[] = {
   B11111,
 };
 
+// Cronómetros
 gb::Clock ck;
 gb::Clock p1ck, p2ck;
 gb::Clock settings_ck;
 
+// Tiempos
 chess::Time gameTime, time1, time2;
+
+//Turno actual (0 => ninguno, 1 => jugador 1, 2 => jugador 2)
 byte turn;
+
+// Pantalla actual
 Screen currentScreen;
+
+// Para la pantalla settings, representa si se están modificando los minutos o segundos (valor binario 0,1)
 byte settings_timer_mode;
 
+// Periodo de reloj
+int gameTimerPeriod = 1000;
+
+// Booleanos para la lectura de pulsadores y eventos
 bool p1pressed = false;
 bool p2pressed = false;
 bool p1p2pressed = false;
@@ -200,12 +221,18 @@ bool p1Event = false;
 bool p2Event = false;
 bool p1p2Event = false;
 
+// Booleanos para controlar el renderizado estático de la pantalla
 bool welcomeOnce = false;
 bool menuOnce = false;
 bool settingsOnce = false;
 bool clockOnce = false;
-bool paused = false;
 
+// Booleanos para control
+bool paused = false;
+bool blink = false;
+bool finished = false;
+
+// Renderizado estatico de la pantalla. Esta funcion renderiza por completo la pantalla indicada, sólo se debe usar al iniciarla.
 void staticRender(Screen screen)
 {
   if(screen == Screen::WELCOME)
@@ -249,7 +276,7 @@ void staticRender(Screen screen)
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.write(CLOCK_CHAR);
-    lcd.print(" " + gameTime.toString() + " |");
+    lcd.print(" " + gameTime.toString() + " ");
     lcd.write(ARROW_UP_CHAR);
     lcd.print("P1 ");
     lcd.write(ARROW_DOWN_CHAR);
@@ -265,13 +292,11 @@ void staticRender(Screen screen)
   {
     lcd.clear();
     lcd.setCursor(0, 0);
-    //lcd.print("J1     ||     ");
     lcd.print("J1     ");
     lcd.write(WALL_CHAR);
     lcd.write(WALL_CHAR);
     lcd.print("     J2");
     lcd.setCursor(0, 1);
-    // lcd.print(time1.toString() + "  ||  " + time2.toString());
     lcd.print(time1.toString() + "  ");
     lcd.write(WALL_CHAR);
     lcd.write(WALL_CHAR);
@@ -279,6 +304,10 @@ void staticRender(Screen screen)
   }
 }
 
+// Renderizado dinamico de la pantalla. Esta funcion redibuja posiciones concretas de la pantalla. Se debe usar cada vez que haga
+// falta actualizar datos. Además de la pantalla a renderizar, admite 2 parametros booleanos opcionales, estos son "parametros de
+// conveniencia", es decir sirven para indicar informacion y/o estados especiales (por ejemplo en Screen::SETTINGS si flag1 es true
+// se dibujaran los minutos con un parpadeo y si flag2 es true, entonces se dibujaran los segundos con dicho parpadeo).
 void dynamicRender(Screen screen, bool flag1 = true, bool flag2 = true)
 {
   if(screen == Screen::MENU)
@@ -304,21 +333,47 @@ void dynamicRender(Screen screen, bool flag1 = true, bool flag2 = true)
 
   if(screen == Screen::CLOCK)
   {
-    lcd.setCursor(0, 1);
-    // lcd.print(time1.toString() + "  ||  " + time2.toString());
-    lcd.print(time1.toString() + "  ");
-    lcd.write(WALL_CHAR);
-    lcd.write(WALL_CHAR);
-    lcd.print("  " + time2.toString());
+    if(!flag1)
+    {
+      lcd.setCursor(0, 1);
+      lcd.print(time1.toString() + "  ");
+      lcd.write(WALL_CHAR);
+      lcd.write(WALL_CHAR);
+      lcd.print("  " + time2.toString());
+    }
+    else
+    {
+      if(flag2)
+      {
+        lcd.clear();
+      }
+      else
+      {
+        lcd.setCursor(0, 0);
+        lcd.print("J1     ");
+        lcd.write(WALL_CHAR);
+        lcd.write(WALL_CHAR);
+        lcd.print("     J2");
+        lcd.setCursor(0, 1);
+        lcd.print(time1.toString() + "  ");
+        lcd.write(WALL_CHAR);
+        lcd.write(WALL_CHAR);
+        lcd.print("  " + time2.toString());
+      }
+    }
   }
 }
 
+// Restablece los datos por defecto
 void reset()
 {
   welcomeOnce = false;
   menuOnce = false;
   settingsOnce = false;
   clockOnce = false;
+  blink = false;
+  finished = false;
+  gameTimerPeriod = 1000;
 }
 
 #pragma region ARDUINO
@@ -468,6 +523,9 @@ void loop()
       if(p1p2Event)
       {
         p1p2Event = false;
+
+        if(settings_timer_mode == 1 && gameTime.isZero()) return;
+
         settings_timer_mode++;
 
         if(settings_timer_mode == 2)
@@ -523,6 +581,13 @@ void loop()
       if(p1p2Event)
       {
         p1p2Event = false;
+
+        if(finished)
+        {
+          reset();
+          return;
+        }
+
         turn = 0;
         time1 = gameTime;
         time2 = gameTime;
@@ -535,13 +600,20 @@ void loop()
         }
       }
 
-      if(ck.check(1000))
+      if(ck.check(gameTimerPeriod))
       {
         if(turn == 1) time1.sub(0, 1);
         if(turn == 2) time2.sub(0, 1);
 
-        dynamicRender(Screen::CLOCK);
+        dynamicRender(Screen::CLOCK, finished, blink);
         ck.restart();
+
+        if(time1.isZero() || time2.isZero()) 
+        {
+          finished = true;
+          blink = !blink;
+          gameTimerPeriod = 500;
+        }
       }
 
       break;
